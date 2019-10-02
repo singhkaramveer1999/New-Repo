@@ -1,0 +1,67 @@
+Top Module:
+`timescale 1ns / 1ps
+
+
+module top(
+    input clk,
+    inout [7:0] JA,
+    input enter,
+    output [3:0] anode,
+    output [7:0] cathode,
+    //output [3:0] led,
+    input clr
+    //output enter1,
+    //output signal,
+    //output[3:0] ones
+    );
+    wire [3:0] decode;
+    wire fclk;
+    decoder pp1(.clk(clk), .col(JA[3:0]), .row(JA[7:4]),.dout(decode),.hit(fclk));
+    //pulse this decode
+    wire clk_20, ttes;
+    clk_div #(5)cc(.clk(clk),.out_clk(clk_20));
+    clk_div #(29) cc2(.clk(clk),.out_clk(ttes));
+    wire ww;
+//    pulse pss(.clk(clk_20),.deb_in(fclk),.deb_out(ww));
+    wire deco;
+    //
+    wire[3:0] data;
+    //make its pulse
+    //pulse p1(.clk(clk_20),.deb_in(decode),.deb_out(deco));
+    //debounce for enter
+    wire enter1;
+    
+    pulse db(.clk(clk_20),.deb_in(enter),.deb_out(enter1));
+    wire clr1;
+    pulse db2(.clk(clk_20),.deb_in(clr),.deb_out(clr1));
+    wire[2:0] code;
+    wire signal;
+    pulse pis(.clk(clk_20),.deb_in(fclk),.deb_out(signal));
+    wire[3:0]ones ,tens, hundreds, thousands;
+    wire[3:0] led;
+     
+    //assign led = ones;
+    FSM f1
+    (
+    .clk(ttes),
+    .signal(signal),
+    .clr(clr1),
+    .enter(enter1),
+    .outt(led),
+    .dat(decode), 
+    .ones(ones),
+    .tens(tens),
+    .hundreds(hundreds),
+    .thousands(thousands)
+    );
+    
+    sevenseg_all sg(
+    .clk(clk), 
+    .ones(ones), 
+    .tens(tens),
+    .thousands(thousands), 
+    .hundreds(hundreds), 
+    .cathode(cathode), 
+    .anode(anode)
+    );
+Endmodule
